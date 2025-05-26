@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyFirstGoogleMap</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="parking_area">주차구역</string>
+</resources>
