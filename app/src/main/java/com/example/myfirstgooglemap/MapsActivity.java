@@ -125,7 +125,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     }
 
     // View 선언
-    private ImageButton imgbtn_parking, imgbtn_smoke, imgbtn_find_route, imgbtn_search, imgbtn_find_route_daijkstra;
+    private LinearLayout btn_parking_layout, btn_smoke_layout;
+    private ImageButton imgbtn_find_route, imgbtn_search, imgbtn_find_route_daijkstra;
     private RelativeLayout layout_slide_up;
     private LinearLayout layout_bottom_btns, layout_search_line_1, layout_search_line_2, layout_search_line_3;
     private SlidingUpPanelLayout layout_slide;
@@ -201,10 +202,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     private void initializeViews() {
         // View 초기화 코드
-        imgbtn_parking = findViewById(R.id.btn_parking);
-        imgbtn_parking.setImageResource(R.drawable.btn_park_gray);
-        imgbtn_smoke = findViewById(R.id.btn_smoke);
-        imgbtn_smoke.setImageResource(R.drawable.btn_smoke_gray);
+        btn_parking_layout = findViewById(R.id.btn_parking_layout);
+        btn_smoke_layout = findViewById(R.id.btn_smoke_layout);
         imgbtn_find_route = findViewById(R.id.btn_find_route);
         imgbtn_find_route_daijkstra = findViewById(R.id.btn_find_route_daijkstra);
         autotext_building = findViewById(R.id.autotext_building);
@@ -419,7 +418,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         Context context = getApplicationContext();
         if((index = convert(text)) != -1){
             HideKeyboard();
-            layout_slide.setPanelHeight(400);
+            layout_slide.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 
             // vertex 에서 정보를 가져와 View 값 변경
             layout_bottom_btns.setVisibility(View.GONE);
@@ -466,7 +465,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     @Override
     public void onBackPressed() {
-        if(layout_slide.getPanelHeight() != 0 || layout_search_line_2.getVisibility() == View.VISIBLE){
+        if(layout_search_line_2.getVisibility() == View.VISIBLE){
             initDisplay();
         }
         else{
@@ -479,7 +478,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         String tag = (String) marker.getTag();
         if(tag != null){
             autotext_building.setText(tag);
-            initDisplay();
             DisplayBuildingInfo();
         }
 
@@ -488,29 +486,29 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     private void setupClickListeners() {
         // 주차장 마커 토글
-        imgbtn_parking.setOnClickListener(new View.OnClickListener() {
+        btn_parking_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ToggleMarkersVisibility(markers_parking);
                 if(markers_parking.get(0).isVisible()){
-                    imgbtn_parking.setImageResource(R.drawable.btn_park_color);
+                    btn_parking_layout.setBackgroundResource(R.drawable.rounded_parking_active_background);
                 }
                 else{
-                    imgbtn_parking.setImageResource(R.drawable.btn_park_gray);
+                    btn_parking_layout.setBackgroundResource(R.drawable.rounded_white_button_background);
                 }
             }
         });
         
         // 흡연구역 마커 토글
-        imgbtn_smoke.setOnClickListener(new View.OnClickListener() {
+        btn_smoke_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ToggleMarkersVisibility(markers_smoking);
                 if(markers_smoking.get(0).isVisible()){
-                    imgbtn_smoke.setImageResource(R.drawable.btn_smoke_color);
+                    btn_smoke_layout.setBackgroundResource(R.drawable.rounded_smoke_active_background);
                 }
                 else{
-                    imgbtn_smoke.setImageResource(R.drawable.btn_smoke_gray);
+                    btn_smoke_layout.setBackgroundResource(R.drawable.rounded_white_button_background);
                 }
             }
         });
@@ -530,12 +528,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             }
         });
 
-        imgbtn_find_route_daijkstra.setOnClickListener(view -> {
-            String startLocation = autotext_building_from.getText().toString();
-            String endLocation = autotext_building_to.getText().toString();
-            calculateAndDisplayPath(startLocation, endLocation);
-        });
-
         imgbtn_find_route.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -543,12 +535,150 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             }
         });
 
-        img_search.setOnClickListener(new View.OnClickListener() {
+        imgbtn_find_route_daijkstra.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ClickFindRouteBtn();
+                String start = autotext_building_from.getText().toString();
+                String end = autotext_building_to.getText().toString();
+                if (!start.isEmpty() && !end.isEmpty()) {
+                    calculateAndDisplayPath(start, end);
+                }
             }
         });
+
+        autotext_building_from.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                HideKeyboard();
+            }
+        });
+
+        autotext_building_to.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                HideKeyboard();
+            }
+        });
+
+        Ckbox_stair.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recalculatePath();
+            }
+        });
+
+        Ckbox_elevator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recalculatePath();
+            }
+        });
+
+        // 슬라이드 업 패널 상태 변경 리스너
+        layout_slide.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                // 패널이 슬라이드될 때 호출
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    // 패널이 닫혔을 때
+                    // initDisplay(); // 이 부분을 제거합니다.
+                }
+            }
+        });
+    }
+
+    private void calculateAndDisplayPath(String startLocation, String endLocation) {
+        if (startLocation.isEmpty() || endLocation.isEmpty()) {
+            return;
+        }
+
+        // 건물명과 호수 분리
+        String[] startParts = parseLocation(startLocation);
+        String[] endParts = parseLocation(endLocation);
+        
+        // 건물명으로 vertex 찾기
+        int start = convert(startParts[0]);
+        int end = convert(endParts[0]);
+        
+        if (start == -1 || end == -1) {
+            Toast.makeText(this, "출발지 또는 도착지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        initPolylines();
+
+        // 층 정보 파싱 및 시간 계산
+        int startFloor = parseFloor(startLocation);
+        int endFloor = parseFloor(endLocation);
+        int floorTime = calculateFloorTime(startFloor, endFloor);
+
+        HideKeyboard();
+        Dijkstra path = Dijkstra.getInstance(start, end);
+
+        try {
+            setVertex();
+            path.calculateShortestPath(getApplicationContext(), !Ckbox_stair.isChecked(), vertex);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "경로 계산 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 경로 그리기
+        drawPath(vertex, path.getPathNode());
+
+        // 경로 정보 표시
+        displayPathInfo(path.getPathNode());
+        
+        // 거리와 시간 계산 및 표시
+        displayDistanceAndTime(path.getMeter(), path.getTime(), floorTime);
+        
+        // 결과 패널 표시
+        layout_search_line_3.setVisibility(View.VISIBLE);
+    }
+
+    // 층 정보 파싱 메서드
+    private int parseFloor(String location) {
+        // 정규식을 사용하여 층 정보 추출 (예: "본부동 101호" -> 1)
+        Pattern pattern = Pattern.compile("(\\d{3})호");
+        Matcher matcher = pattern.matcher(location);
+        if (matcher.find()) {
+            String roomNumber = matcher.group(1);
+            // 101호 -> 1층, 201호 -> 2층 등으로 변환
+            return Integer.parseInt(roomNumber.substring(0, 1));
+        }
+        return 1; // 기본값 1층
+    }
+
+    // 건물명과 호수 분리 메서드
+    private String[] parseLocation(String location) {
+        // 정규식을 사용하여 건물명과 호수 분리 (예: "본부동 101호" -> ["본부동", "101호"])
+        Pattern pattern = Pattern.compile("(.+?)\\s*(\\d{3}호)?$");
+        Matcher matcher = pattern.matcher(location);
+        if (matcher.find()) {
+            String buildingName = matcher.group(1).trim();
+            String roomNumber = matcher.group(2);
+            return new String[]{buildingName, roomNumber != null ? roomNumber : ""};
+        }
+        return new String[]{location, ""};
+    }
+
+    // 층 이동 시간 계산 메서드
+    private int calculateFloorTime(int startFloor, int endFloor) {
+        int floorDiff = Math.abs(startFloor - endFloor);
+        if (floorDiff == 0) return 0;
+
+        // 엘레베이터 체크박스가 체크된 경우에만 엘레베이터 시간 적용
+        if (Ckbox_elevator.isChecked()) {
+            return floorDiff * 15;  // 엘레베이터는 층당 15초
+        }
+        
+        // 엘레베이터가 체크되지 않은 경우 계단 시간 적용
+        return floorDiff * 30;  // 계단은 층당 30초
     }
 
     private void drawPath(ArrayList<Vertex> vertex, String pathNode) {
@@ -627,125 +757,16 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return pathTime + floorTime;
     }
 
-    // 체크박스 리스너 설정 메서드
     private void setupCheckBoxListeners() {
-        if (Ckbox_stair == null || Ckbox_elevator == null) {
-            Log.e("MapsActivity", "CheckBoxes not initialized");
-            return;
-        }
-
-        try {
-            // 체크박스 상태 변경 리스너
-            View.OnClickListener checkboxListener = v -> {
-                if (layout_search_line_3.getVisibility() == View.VISIBLE) {
-                    String startLocation = autotext_building_from.getText().toString();
-                    String endLocation = autotext_building_to.getText().toString();
-                    calculateAndDisplayPath(startLocation, endLocation);
-                }
-            };
-
-            Ckbox_stair.setOnClickListener(checkboxListener);
-            Ckbox_elevator.setOnClickListener(checkboxListener);
-        } catch (Exception e) {
-            Log.e("MapsActivity", "Error setting up checkbox listeners: " + e.getMessage());
-        }
+        Ckbox_stair.setOnCheckedChangeListener((buttonView, isChecked) -> recalculatePath());
+        Ckbox_elevator.setOnCheckedChangeListener((buttonView, isChecked) -> recalculatePath());
     }
 
-    // 경로 재계산 메서드
     private void recalculatePath() {
         String startLocation = autotext_building_from.getText().toString();
         String endLocation = autotext_building_to.getText().toString();
-        calculateAndDisplayPath(startLocation, endLocation);
-    }
-
-    // 층 정보 파싱 메서드
-    private int parseFloor(String location) {
-        // 정규식을 사용하여 층 정보 추출 (예: "본부동 101호" -> 1)
-        Pattern pattern = Pattern.compile("(\\d{3})호");
-        Matcher matcher = pattern.matcher(location);
-        if (matcher.find()) {
-            String roomNumber = matcher.group(1);
-            // 101호 -> 1층, 201호 -> 2층 등으로 변환
-            return Integer.parseInt(roomNumber.substring(0, 1));
+        if (!startLocation.isEmpty() && !endLocation.isEmpty()) {
+            calculateAndDisplayPath(startLocation, endLocation);
         }
-        return 1; // 기본값 1층
-    }
-
-    // 건물명과 호수 분리 메서드
-    private String[] parseLocation(String location) {
-        // 정규식을 사용하여 건물명과 호수 분리 (예: "본부동 101호" -> ["본부동", "101호"])
-        Pattern pattern = Pattern.compile("(.+?)\\s*(\\d{3}호)?$");
-        Matcher matcher = pattern.matcher(location);
-        if (matcher.find()) {
-            String buildingName = matcher.group(1).trim();
-            String roomNumber = matcher.group(2);
-            return new String[]{buildingName, roomNumber != null ? roomNumber : ""};
-        }
-        return new String[]{location, ""};
-    }
-
-    // 층 이동 시간 계산 메서드
-    private int calculateFloorTime(int startFloor, int endFloor) {
-        int floorDiff = Math.abs(startFloor - endFloor);
-        if (floorDiff == 0) return 0;
-
-        // 엘레베이터 체크박스가 체크된 경우에만 엘레베이터 시간 적용
-        if (Ckbox_elevator.isChecked()) {
-            return floorDiff * 15;  // 엘레베이터는 층당 15초
-        }
-        
-        // 엘레베이터가 체크되지 않은 경우 계단 시간 적용
-        return floorDiff * 30;  // 계단은 층당 30초
-    }
-
-    // 경로 계산 및 표시 메서드
-    private void calculateAndDisplayPath(String startLocation, String endLocation) {
-        if (startLocation.isEmpty() || endLocation.isEmpty()) {
-            return;
-        }
-
-        // 건물명과 호수 분리
-        String[] startParts = parseLocation(startLocation);
-        String[] endParts = parseLocation(endLocation);
-        
-        // 건물명으로 vertex 찾기
-        int start = convert(startParts[0]);
-        int end = convert(endParts[0]);
-        
-        if (start == -1 || end == -1) {
-            Toast.makeText(this, "출발지 또는 도착지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        initPolylines();
-
-        // 층 정보 파싱 및 시간 계산
-        int startFloor = parseFloor(startLocation);
-        int endFloor = parseFloor(endLocation);
-        int floorTime = calculateFloorTime(startFloor, endFloor);
-
-        HideKeyboard();
-        Dijkstra path = Dijkstra.getInstance(start, end);
-
-        try {
-            setVertex();
-            path.calculateShortestPath(getApplicationContext(), !Ckbox_stair.isChecked(), vertex);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "경로 계산 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // 경로 그리기
-        drawPath(vertex, path.getPathNode());
-
-        // 경로 정보 표시
-        displayPathInfo(path.getPathNode());
-        
-        // 거리와 시간 계산 및 표시
-        displayDistanceAndTime(path.getMeter(), path.getTime(), floorTime);
-        
-        // 결과 패널 표시
-        layout_search_line_3.setVisibility(View.VISIBLE);
     }
 }

@@ -32,36 +32,6 @@
                     android:layout_height="match_parent">
 
 
-                    <LinearLayout
-                        android:id="@+id/layout_bottom_btns"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:layout_alignParentBottom="true"
-                        android:orientation="horizontal"
-                        android:padding="0dp">
-
-                        <ImageButton
-                            android:id="@+id/btn_smoke"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:padding="0dp"
-                            android:scaleType="fitXY"
-                            android:src="@drawable/btn_smoke_color" />
-
-                        <ImageButton
-                            android:id="@+id/btn_parking"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:padding="0dp"
-                            android:scaleType="fitXY"
-                            android:contentDescription="@string/parking_area"
-                            android:src="@drawable/btn_park_color" />
-
-                    </LinearLayout>
-
-
                 </RelativeLayout>
 
             </fragment>
@@ -233,6 +203,79 @@
 
         </LinearLayout>
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_bottom_btns"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:padding="0dp"
+        android:layout_below="@+id/search_line_1"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
+
+        <!-- 흡연구역 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_smoke_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded_white_button_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:layout_marginEnd="5dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_smoke_color"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="흡연구역"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- 주차구역 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_parking_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded_white_button_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:layout_marginStart="5dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_park_color"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="주차구역"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -3,22 +3,51 @@
     android:height="38dp"
     android:viewportWidth="34"
     android:viewportHeight="38">
-  <path
-      android:pathData="M16.5773,16.5773m-16.5773,0a16.5773,16.5773 0,1 1,33.1546 0a16.5773,16.5773 0,1 1,-33.1546 0"
-      android:fillColor="#FFB979"/>
-  <path
-      android:pathData="M20.1921,7.277C19.9375,6.3236 19.0664,5.6194 18.0339,5.6194C17.5074,5.6194 17.0078,5.8072 16.6142,6.1355C16.0849,5.6913 15.3688,5.5128 14.653,5.6834C13.8466,5.8755 13.205,6.5212 13.0183,7.3283C12.776,8.3759 13.2863,9.4061 14.2078,9.8538C14.3872,10.9067 15.3063,11.7107 16.4095,11.7107C16.6307,11.7107 16.8481,11.6785 17.0561,11.6156C17.4694,12.1754 18.1292,12.5229 18.846,12.5229C19.6953,12.5229 20.455,12.0403 20.8298,11.3047H21.0367C21.7494,11.3047 22.4109,11.6587 22.8062,12.2517C22.9213,12.4243 23.1132,12.523 23.3131,12.523C23.3718,12.523 23.4312,12.5144 23.4896,12.4968C23.7465,12.419 23.9222,12.1822 23.9222,11.9138V11.5077C23.9222,9.3374 22.2921,7.5406 20.1921,7.277Z"
-      android:fillColor="#ffffff"/>
-  <path
-      android:pathData="M11.8573,20.775L7.813,23.11C7.3274,23.3903 7.161,24.0112 7.4413,24.4968L8.2535,25.9036C8.5339,26.3891 9.1548,26.5555 9.6404,26.2752L13.6847,23.9402L11.8573,20.775Z"
-      android:fillColor="#ffffff"/>
-  <path
-      android:pathData="M12.9116,20.1656L22.231,14.7849L24.0584,17.95L14.739,23.3307L12.9116,20.1656Z"
-      android:fillColor="#ffffff"/>
-  <path
-      android:pathData="M23.9904,13.7699L23.287,14.176L25.1144,17.3411L25.8178,16.9351C26.3033,16.6547 26.4697,16.0338 26.1894,15.5482L25.3772,14.1415C25.0969,13.6559 24.4759,13.4896 23.9904,13.7699Z"
-      android:fillColor="#ffffff"/>
-  <path
-      android:pathData="M17.0252,37.6349L11.5931,27.5542L22.4574,27.5542L17.0252,37.6349Z"
-      android:fillColor="#FFB979"/>
+    <!-- 배경 원 -->
+    <path
+        android:pathData="M16.5773,16.5773m-16.5773,0a16.5773,16.5773 0,1 1,33.1546 0a16.5773,16.5773 0,1 1,-33.1546 0"
+        android:fillColor="#FFB979"/>
+
+    <!-- 담배 외곽선 -->
+    <path
+        android:pathData="M7,15 L27,15 L27,19 L7,19 Z"
+        android:strokeColor="#4A4A4A"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+
+    <!-- 담배 몸통 (흰색 부분) -->
+    <path
+        android:pathData="M8.5,15.5 L22.5,15.5 L22.5,18.5 L8.5,18.5 Z"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- 담배 필터 (주황색 부분) -->
+    <path
+        android:pathData="M22.5,15.5 L26.5,15.5 L26.5,18.5 L22.5,18.5 Z"
+        android:fillColor="#FFA500"/>
+
+    <!-- 담배 불 붙은 부분 (빨간색) -->
+    <path
+        android:pathData="M7.5,15.5 L8.5,15.5 L8,17 L8.5,18.5 L7.5,18.5 Z"
+        android:fillColor="#FF0000"/>
+
+    <!-- 연기 1 -->
+    <path
+        android:pathData="M10,14 C9,11 11,10 10,7"
+        android:strokeColor="#4A4A4A"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+
+    <!-- 연기 2 -->
+    <path
+        android:pathData="M14,14 C13,11 15,10 14,7"
+        android:strokeColor="#4A4A4A"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+
+    <!-- 화살표 -->
+    <path
+        android:pathData="M17.0252,37.6349L11.5931,27.5542L22.4574,27.5542L17.0252,37.6349Z"
+        android:fillColor="#FFB979"/>
 </vector>

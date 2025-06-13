@@ -6,12 +6,12 @@
     <!-- 배경 원 -->
     <path
         android:pathData="M16.5773,16.5773m-16.5773,0a16.5773,16.5773 0,1 1,33.1546 0a16.5773,16.5773 0,1 1,-33.1546 0"
-        android:fillColor="#F5F5F5"/>
+        android:fillColor="#FFB979"/>
 
     <!-- 담배 외곽선 -->
     <path
         android:pathData="M7,15 L27,15 L27,19 L7,19 Z"
-        android:strokeColor="#8D8D8D"
+        android:strokeColor="#4A4A4A"
         android:strokeWidth="1.5"
         android:fillColor="#00000000"
         android:strokeLineCap="round"
@@ -22,32 +22,32 @@
         android:pathData="M8.5,15.5 L22.5,15.5 L22.5,18.5 L8.5,18.5 Z"
         android:fillColor="#FFFFFF"/>
 
-    <!-- 담배 필터 (주황색 부분 - 회색 톤으로 변경) -->
+    <!-- 담배 필터 (주황색 부분) -->
     <path
         android:pathData="M22.5,15.5 L26.5,15.5 L26.5,18.5 L22.5,18.5 Z"
-        android:fillColor="#BFBFBF"/>
+        android:fillColor="#FFA500"/>
 
-    <!-- 담배 불 붙은 부분 (빨간색 - 회색 톤으로 변경) -->
+    <!-- 담배 불 붙은 부분 (빨간색) -->
     <path
         android:pathData="M7.5,15.5 L8.5,15.5 L8,17 L8.5,18.5 L7.5,18.5 Z"
-        android:fillColor="#9E9E9E"/>
+        android:fillColor="#FF0000"/>
 
     <!-- 연기 1 -->
     <path
         android:pathData="M10,14 C9,11 11,10 10,7"
-        android:strokeColor="#8D8D8D"
+        android:strokeColor="#4A4A4A"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"/>
 
     <!-- 연기 2 -->
     <path
         android:pathData="M14,14 C13,11 15,10 14,7"
-        android:strokeColor="#8D8D8D"
+        android:strokeColor="#4A4A4A"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"/>
 
-    <!-- 화살표 (회색 톤으로 유지) -->
+    <!-- 화살표 -->
     <path
         android:pathData="M17.0252,37.6349L11.5931,27.5542L22.4574,27.5542L17.0252,37.6349Z"
-        android:fillColor="#F5F5F5"/>
-</vector>
+        android:fillColor="#FFB979"/>
+</vector> 
