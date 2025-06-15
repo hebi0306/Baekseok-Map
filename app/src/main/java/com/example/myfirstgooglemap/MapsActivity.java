@@ -420,6 +420,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             HideKeyboard();
             layout_slide.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 
+            // 경로 정보 초기화
+            initPathDisplay();
+
             // vertex 에서 정보를 가져와 View 값 변경
             layout_bottom_btns.setVisibility(View.GONE);
             text_building_no.setText("No. " + vertex.get(index).id);
@@ -452,9 +455,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         layout_slide.setPanelHeight(0);
         layout_search_line_1.setVisibility(View.VISIBLE);
         layout_search_line_2.setVisibility(View.INVISIBLE);
-        layout_search_line_3.setVisibility(View.INVISIBLE);
         layout_bottom_btns.setVisibility(View.VISIBLE);
+    }
+
+    // 경로 초기화를 위한 메서드
+    public void initPathDisplay() {
         initPolylines();
+        layout_search_line_3.setVisibility(View.INVISIBLE);
+        text_path.setText("");
+        text_meter.setText("");
     }
 
     public void initPolylines(){
@@ -466,7 +475,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     @Override
     public void onBackPressed() {
         if(layout_search_line_2.getVisibility() == View.VISIBLE){
-            initDisplay();
+            initPathDisplay();
+        }
+        else if(layout_search_line_3.getVisibility() == View.VISIBLE){
+            initPathDisplay();
         }
         else{
             super.onBackPressed();
@@ -585,7 +597,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     // 패널이 닫혔을 때
-                    // initDisplay(); // 이 부분을 제거합니다.
+                    initDisplay();
                 }
             }
         });
