@@ -54,24 +54,33 @@ import java.util.regex.Matcher;
 
 /**
  * 백석대학교 캠퍼스 맵을 표시하고 경로 안내를 제공하는 메인 액티비티
+ * 
+ * 주요 기능:
+ * 1. 구글 맵을 통한 캠퍼스 지도 표시
+ * 2. 건물, 주차장, 흡연 구역 마커 표시
+ * 3. 최단 경로 계산 및 표시
+ * 4. 건물 정보 표시
+ * 5. 장애인 경로 지원
  */
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarkerClickListener, OnMapReadyCallback {
 
-    // 상수 정의
+    /**
+     * 앱에서 사용되는 상수들을 정의하는 내부 클래스
+     */
     private static class Constants {
         /** 전체 노드 수 */
         static final int TOTAL_NODES = 139;
         
-        /** 캠퍼스 중심 좌표 */
+        /** 캠퍼스 중심 좌표 (위도, 경도) */
         static final LatLng CAMPUS_CENTER = new LatLng(36.8400, 127.1840);
         
-        /** 지도 범위 제한 */
+        /** 지도 표시 범위 제한 (남서쪽, 북동쪽 좌표) */
         static final LatLngBounds CAMPUS_BOUNDS = new LatLngBounds(
             new LatLng(36.8370, 127.1800),  // SW bounds
             new LatLng(36.8430, 127.1890)   // NE bounds
         );
         
-        /** 주차장 좌표 */
+        /** 주차장 좌표 목록 (위도, 경도) */
         static final double[] PARKING_POINTS = {
             36.840566, 127.188988,  // 주차장 1
             36.840856, 127.186043,  // 주차장 2
@@ -84,7 +93,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             36.838715, 127.186097   // 주차장 9
         };
 
-        /** 흡연 구역 좌표 */
+        /** 흡연 구역 좌표 목록 (위도, 경도) */
         static final double[] SMOKING_AREA_POINTS = {
             36.840973, 127.187829,  // 흡연장 1
             36.839576, 127.186077,  // 흡연장 2
@@ -97,7 +106,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             36.837246, 127.185478   // 흡연장 9
         };
 
-        /** 건물 좌표 */
+        /** 건물 좌표 목록 (위도, 경도) */
         static final double[] BUILDING_POINTS = {
             36.841339, 127.181359, // 정문 (1)
             36.840063, 127.180060, // 후문 (2)
@@ -125,25 +134,43 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     }
 
     // View 선언
+    /** 주차장 버튼 레이아웃 */
     private LinearLayout btn_parking_layout, btn_smoke_layout;
+    /** 경로 찾기 버튼 */
     private ImageButton imgbtn_find_route, imgbtn_search, imgbtn_find_route_daijkstra;
+    /** 슬라이딩 패널 레이아웃 */
     private RelativeLayout layout_slide_up;
+    /** 하단 버튼 레이아웃 */
     private LinearLayout layout_bottom_btns, layout_search_line_1, layout_search_line_2, layout_search_line_3;
+    /** 슬라이딩 패널 */
     private SlidingUpPanelLayout layout_slide;
+    /** 건물 검색 자동완성 텍스트뷰 */
     private AutoCompleteTextView autotext_building, autotext_building_from, autotext_building_to;
+    /** 건물 정보 표시 텍스트뷰들 */
     private TextView text_building_no, text_building_name, text_building_name_eng, text_path, text_meter;
+    /** 이미지뷰들 */
     private ImageView img_search, img_building_photo_1, img_smoke, img_parking;
+    /** 계단/엘리베이터 체크박스 */
     private CheckBox Ckbox_stair, Ckbox_elevator;
 
     // 변수 선언
+    /** 구글 맵 객체 */
     private GoogleMap mMap;
+    /** 지도 중심 좌표 */
     private LatLng center;
+    /** 건물명 어댑터 */
     private ArrayAdapter<String> stringadt_building;
+    /** 강의실명 어댑터 */
     private ArrayAdapter<String> stringadt_rooms;
+    /** 마커 리스트들 */
     private ArrayList<Marker> markers_smoking, markers_building, markers_parking;
+    /** 경로 폴리라인 리스트 */
     private ArrayList<Polyline> polylines;
+    /** 강의실명 리스트 */
     private ArrayList<String> ROOM_NAMES = new ArrayList<>();
+    /** 정점(Vertex) 리스트 */
     private static ArrayList<Vertex> vertex = new ArrayList<>(Constants.TOTAL_NODES);
+    /** 건물명 리스트 */
     private static ArrayList<String> BUILDING_NAMES = new ArrayList<>();
 
     @Override
@@ -151,6 +178,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        // 초기화 작업 수행
         initializeLists();
         initializeCheckboxes();
         initializeMap();
@@ -159,6 +187,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         setupClickListeners();
     }
 
+    /**
+     * 리스트 초기화
+     */
     private void initializeLists() {
         markers_smoking = new ArrayList<>();
         markers_building = new ArrayList<>();
@@ -168,6 +199,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         ROOM_NAMES = new ArrayList<>();
     }
 
+    /**
+     * 체크박스 초기화 및 설정
+     */
     private void initializeCheckboxes() {
         try {
             Ckbox_stair = findViewById(R.id.Ckbox_stair);
@@ -185,6 +219,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 지도 초기화 및 설정
+     */
     private void initializeMap() {
         try {
             setVertex();
@@ -200,6 +237,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         center = Constants.CAMPUS_CENTER;
     }
 
+    /**
+     * View 초기화
+     */
     private void initializeViews() {
         // View 초기화 코드
         btn_parking_layout = findViewById(R.id.btn_parking_layout);
@@ -230,6 +270,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         layout_search_line_3.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * 어댑터 설정
+     */
     private void setupAdapters() {
         stringadt_building = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, BUILDING_NAMES);
         stringadt_rooms = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, ROOM_NAMES);
@@ -238,6 +281,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         autotext_building_to.setAdapter(stringadt_rooms);
     }
 
+    /**
+     * 정점(Vertex) 데이터 로드
+     * vertex.txt 파일에서 건물 정보를 읽어와 Vertex 객체 생성
+     */
     public void setVertex() throws IOException {
         BUILDING_NAMES.clear(); // 기존 목록 초기화
         vertex.clear(); // 기존 vertex 목록 초기화
@@ -273,7 +320,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
-    // 호수 정보 로드 메서드
+    /**
+     * 강의실 데이터 로드
+     * room.txt 파일에서 강의실 정보를 읽어옴
+     */
     private void loadRoomData() throws IOException {
         try {
             InputStream is = this.getApplicationContext().getResources().openRawResource(R.raw.rooms);
@@ -300,6 +350,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 구글 맵이 준비되면 호출되는 콜백
+     * 지도 설정 및 마커 표시
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -308,6 +362,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         mMap.setOnMarkerClickListener(this);
     }
 
+    /**
+     * 지도 기본 설정
+     */
     private void setupMapSettings() {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(center));
         mMap.setMinZoomPreference(17);
@@ -315,12 +372,18 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         mMap.setLatLngBoundsForCameraTarget(Constants.CAMPUS_BOUNDS);
     }
 
+    /**
+     * 마커 설정
+     */
     private void setupMarkers() {
         setupParkingMarkers();
         setupSmokingAreaMarkers();
         setupBuildingMarkers();
     }
 
+    /**
+     * 주차장 마커 설정
+     */
     private void setupParkingMarkers() {
         BitmapDescriptor bitmap_parking = GetBitmapDescriptor(R.drawable.ic_mark_parking, 70);
         for(int i = 0; i < Constants.PARKING_POINTS.length; i+=2) {
@@ -332,6 +395,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 흡연 구역 마커 설정
+     */
     private void setupSmokingAreaMarkers() {
         BitmapDescriptor bitmap_smoking = GetBitmapDescriptor(R.drawable.ic_mark_smoking, 70);
         for(int i = 0; i < Constants.SMOKING_AREA_POINTS.length; i+=2) {
@@ -343,6 +409,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 건물 마커 설정
+     */
     private void setupBuildingMarkers() {
         BitmapDescriptor bitmap_building = GetBitmapDescriptor(R.drawable.ic_mark_building, 60);
         for(Vertex v : vertex) {
@@ -357,6 +426,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 마커 표시/숨김 토글
+     */
     private void ToggleMarkersVisibility(ArrayList<Marker> markers){
         int size = markers.size();
         if(markers.get(0).isVisible()){    // 마커가 표시 중이라면 보이지 않게 만들기
@@ -371,6 +443,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 마커 아이콘 생성
+     */
     private BitmapDescriptor GetBitmapDescriptor(@DrawableRes int id, int size) {
         Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth() * size / 100,
@@ -381,6 +456,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
+    /**
+     * 키보드 숨김
+     */
     private void HideKeyboard(){
         View view = getCurrentFocus();
         if (view != null) {
@@ -389,6 +467,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 위치 문자열을 노드 번호로 변환
+     */
     public int convert(String spot) {
         int result = -1; // 못 찾았을 경우, -1로 반환합니다.
 
@@ -403,6 +484,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return result;
     }
 
+    /**
+     * 경로 찾기 버튼 클릭 처리
+     */
     private void ClickFindRouteBtn(){
         HideKeyboard();
         layout_slide.setPanelHeight(0);
@@ -412,6 +496,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         autotext_building.setText("");
     }
 
+    /**
+     * 건물 정보 표시
+     */
     private void DisplayBuildingInfo(){
         String text = autotext_building.getText().toString();
         int index;
@@ -450,6 +537,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 화면 초기화
+     */
     public void initDisplay(){
         HideKeyboard();
         layout_slide.setPanelHeight(0);
@@ -458,7 +548,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         layout_bottom_btns.setVisibility(View.VISIBLE);
     }
 
-    // 경로 초기화를 위한 메서드
+    /**
+     * 경로 표시 초기화
+     */
     public void initPathDisplay() {
         initPolylines();
         layout_search_line_3.setVisibility(View.INVISIBLE);
@@ -466,12 +558,18 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         text_meter.setText("");
     }
 
+    /**
+     * 폴리라인 초기화
+     */
     public void initPolylines(){
         for(Polyline p : polylines){
             p.remove();
         }
     }
 
+    /**
+     * 뒤로가기 버튼 처리
+     */
     @Override
     public void onBackPressed() {
         if(layout_search_line_2.getVisibility() == View.VISIBLE){
@@ -485,6 +583,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 마커 클릭 이벤트 처리
+     */
     @Override
     public boolean onMarkerClick(final Marker marker) {
         String tag = (String) marker.getTag();
@@ -496,6 +597,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return false;
     }
 
+    /**
+     * 클릭 리스너 설정
+     */
     private void setupClickListeners() {
         // 주차장 마커 토글
         btn_parking_layout.setOnClickListener(new View.OnClickListener() {
@@ -603,6 +707,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         });
     }
 
+    /**
+     * 경로 계산 및 표시
+     */
     private void calculateAndDisplayPath(String startLocation, String endLocation) {
         if (startLocation.isEmpty() || endLocation.isEmpty()) {
             return;
@@ -653,7 +760,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         layout_search_line_3.setVisibility(View.VISIBLE);
     }
 
-    // 층 정보 파싱 메서드
+    /**
+     * 층수 파싱
+     */
     private int parseFloor(String location) {
         // 정규식을 사용하여 층 정보 추출 (예: "본부동 101호" -> 1)
         Pattern pattern = Pattern.compile("(\\d{3})호");
@@ -666,7 +775,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return 1; // 기본값 1층
     }
 
-    // 건물명과 호수 분리 메서드
+    /**
+     * 위치 문자열 파싱
+     */
     private String[] parseLocation(String location) {
         // 정규식을 사용하여 건물명과 호수 분리 (예: "본부동 101호" -> ["본부동", "101호"])
         Pattern pattern = Pattern.compile("(.+?)\\s*(\\d{3}호)?$");
@@ -679,7 +790,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return new String[]{location, ""};
     }
 
-    // 층 이동 시간 계산 메서드
+    /**
+     * 층간 이동 시간 계산
+     */
     private int calculateFloorTime(int startFloor, int endFloor) {
         int floorDiff = Math.abs(startFloor - endFloor);
         if (floorDiff == 0) return 0;
@@ -693,6 +806,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return floorDiff * 30;  // 계단은 층당 30초
     }
 
+    /**
+     * 경로 그리기
+     */
     private void drawPath(ArrayList<Vertex> vertex, String pathNode) {
         if (pathNode == null || pathNode.isEmpty()) return;
 
@@ -710,6 +826,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+    /**
+     * 폴리라인 옵션 생성
+     */
     private PolylineOptions createPolylineOptions(Vertex start, Vertex end) {
         boolean isBuildingPath = start.id <= 22 && end.id <= 22;
         int color = isBuildingPath ? Color.RED : Color.BLUE;
@@ -723,6 +842,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             .pattern(Arrays.asList(new Dash(30), new Gap(20)));
     }
 
+    /**
+     * 경로 정보 표시
+     */
     private void displayPathInfo(String pathNode) {
         String[] nodes = pathNode.split(" ");
         StringBuilder pathInfo = new StringBuilder("최단 경로: ");
@@ -742,6 +864,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         text_path.setText(pathInfo.toString());
     }
 
+    /**
+     * 다음 건물 존재 여부 확인
+     */
     private boolean hasNextBuilding(String[] nodes, int currentIndex) {
         for(int j = currentIndex + 1; j < nodes.length; j++) {
             int nextVertexIndex = Integer.parseInt(nodes[j]);
@@ -752,6 +877,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return false;
     }
 
+    /**
+     * 거리와 시간 정보 표시
+     */
     private void displayDistanceAndTime(int distance, int pathTime, int floorTime) {
         int totalSeconds = calculateTotalTime(distance, pathTime, floorTime);
         int totalMinutes = totalSeconds / 60;
@@ -761,6 +889,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             distance, totalMinutes, remainingSeconds));
     }
 
+    /**
+     * 총 이동 시간 계산
+     */
     private int calculateTotalTime(int distance, int pathTime, int floorTime) {
         if (Ckbox_stair.isChecked()) {
             double kickboardSpeed = 4.17; // m/s (15km/h)
@@ -769,11 +900,17 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return pathTime + floorTime;
     }
 
+    /**
+     * 체크박스 리스너 설정
+     */
     private void setupCheckBoxListeners() {
         Ckbox_stair.setOnCheckedChangeListener((buttonView, isChecked) -> recalculatePath());
         Ckbox_elevator.setOnCheckedChangeListener((buttonView, isChecked) -> recalculatePath());
     }
 
+    /**
+     * 경로 재계산
+     */
     private void recalculatePath() {
         String startLocation = autotext_building_from.getText().toString();
         String endLocation = autotext_building_to.getText().toString();
